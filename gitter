@@ -1,0 +1,65 @@
+#!/bin/bash
+
+die() {
+    printf '%s\n' "$1" >&2
+    exit 1
+}
+
+show_help() {
+cat << EOF
+Usage: gitter [OPTION] [REPO_URL]
+Creates the repo in a deterministic place, as of now, the only place is in a new file
+(determined by REPO name). Then, this new file is opened in VSCode (using code command).
+
+OPTIONS:
+    -n|--new  : create a new repo in repos directory, open code in this new directory
+    -f|--file : open code in an existing repo, specified after flag
+EOF
+}
+
+if [ $# -lt 1 ]
+then
+    echo "You have entered no arguments"
+    exit
+fi
+
+# This is the directory that all my git hub repos will be stored in 
+myPath='c:/Users/Nova/repos'
+
+cd ${myPath}
+# if echo $* | grep -e "-n" -q ; then
+#     echo ">>> Creating new directory ${FILENAME} <<<"
+#     git clone ${REPO}
+#     cd ${FILENAME}
+#     code ${myPath}/${FILENAME}
+# else
+#     echo ">>> Opening code with workspace ${FILENAME} <<<"
+#     code ${myPath}/${FILENAME}
+# fi
+
+while :; do
+    case $1 in
+        -h|-\?|--help)  # Display info about this script
+            show_help
+            exit
+            ;;
+        -n|--new)
+            if [ "$2" ] ; then
+                REPO=$2
+                FILENAME=$(echo $REPO | cut -d'/' -f 5 | cut -d'.' -f 1)
+                code ${REPO}/${FILENAME}
+            else
+                die 'ERROR: "--new" requires a file-like structure with a .git file to operate.'
+            fi
+            ;;
+        -f|--file)
+            if [ "$2" ] ; then
+                FILENAME=$2
+                code ${FILENAME}
+            fi
+            ;;
+        *) #DEFAULT
+            break
+    esac
+    shift
+done
